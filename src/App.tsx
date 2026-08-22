@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Phone, Mail, MapPin, ChevronRight, Shield, Award, Calendar, CheckCircle2, ChevronDown, Wrench, Menu, X } from 'lucide-react';
+import { useState } from 'react';
+import { Phone, Mail, MapPin, ChevronRight, Shield, Award, Calendar, CheckCircle2, ChevronDown, Menu, X } from 'lucide-react';
 
 const TopBar = () => (
   <div className="bg-brand-navy text-white text-sm py-2 px-4 md:px-8">
