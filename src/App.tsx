@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { ArrowUpRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 // @ts-ignore
-import anime from 'animejs/lib/anime.es.js';
+import anime from 'animejs';
 
 // --- AnimeJS Interactive Background ---
 const AnimeGrid = () => {
