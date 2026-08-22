@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
-import { Phone, Mail, MapPin, ChevronRight, Shield, Award, Calendar, CheckCircle2, ChevronDown, Menu, X, ArrowUpRight, Zap } from 'lucide-react';
+import { ArrowUpRight } from 'lucide-react';
 import { motion } from 'framer-motion';
+// @ts-ignore
 import anime from 'animejs';
 
 // --- AnimeJS Interactive Background ---
@@ -36,7 +37,7 @@ const AnimeGrid = () => {
         
         tile.appendChild(inner);
         
-        tile.onclick = (e) => {
+        tile.onclick = () => {
           anime({
             targets: '.tile-inner',
             opacity: [
@@ -91,7 +92,6 @@ const AnimeGrid = () => {
 
 // --- UI Components ---
 const Navbar = () => {
-  const [isOpen, setIsOpen] = useState(false);
   return (
     <nav className="absolute top-0 w-full z-50 pt-8 px-4 md:px-12">
       <div className="max-w-7xl mx-auto flex justify-between items-center">
