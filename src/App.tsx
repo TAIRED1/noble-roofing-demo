@@ -1,21 +1,81 @@
-import { useState } from 'react';
-import { Phone, Mail, MapPin, ChevronRight, Shield, Award, Calendar, CheckCircle2, ChevronDown, Menu, X } from 'lucide-react';
+import { useState, useRef, Suspense } from 'react';
+import { Phone, Mail, MapPin, ChevronRight, Shield, Award, Calendar, CheckCircle2, ChevronDown, Menu, X, ArrowUpRight, Zap } from 'lucide-react';
+import { motion, useScroll, useTransform } from 'framer-motion';
+import { Canvas, useFrame } from '@react-three/fiber';
+import { MeshDistortMaterial, Sphere, Float, Environment, ContactShadows, PresentationControls } from '@react-three/drei';
 
+// --- 3D Scene Components ---
+function AbstractStructure() {
+  const meshRef = useRef<any>();
+  
+  useFrame((state) => {
+    if (meshRef.current) {
+      meshRef.current.rotation.x = state.clock.elapsedTime * 0.2;
+      meshRef.current.rotation.y = state.clock.elapsedTime * 0.3;
+    }
+  });
+
+  return (
+    <PresentationControls
+      global
+      config={{ mass: 2, tension: 500 }}
+      snap={{ mass: 4, tension: 1500 }}
+      rotation={[0, 0.3, 0]}
+      polar={[-Math.PI / 3, Math.PI / 3]}
+      azimuth={[-Math.PI / 1.4, Math.PI / 2]}
+    >
+      <Float speed={2} rotationIntensity={1.5} floatIntensity={2}>
+        <mesh ref={meshRef} scale={1.5}>
+          <icosahedronGeometry args={[1, 1]} />
+          <MeshDistortMaterial 
+            color="#D92D20" 
+            envMapIntensity={1} 
+            clearcoat={1} 
+            clearcoatRoughness={0.1} 
+            metalness={0.8}
+            roughness={0.2}
+            distort={0.4}
+            speed={2}
+          />
+        </mesh>
+      </Float>
+    </PresentationControls>
+  );
+}
+
+function Scene3D() {
+  return (
+    <div className="absolute inset-0 z-0 h-[120%] -translate-y-[10%] opacity-80 mix-blend-screen pointer-events-auto">
+      <Canvas camera={{ position: [0, 0, 5], fov: 45 }}>
+        <ambientLight intensity={0.5} />
+        <directionalLight position={[10, 10, 5]} intensity={2} color="#D92D20" />
+        <directionalLight position={[-10, -10, -5]} intensity={1} color="#4f46e5" />
+        <Suspense fallback={null}>
+          <AbstractStructure />
+          <Environment preset="city" />
+          <ContactShadows position={[0, -2, 0]} opacity={0.5} scale={20} blur={2} far={4.5} />
+        </Suspense>
+      </Canvas>
+    </div>
+  );
+}
+
+// --- UI Components ---
 const TopBar = () => (
-  <div className="bg-brand-navy text-white text-sm py-2 px-4 md:px-8">
+  <div className="bg-brand-navy_light text-gray-400 text-xs py-2 px-4 md:px-8 border-b border-white/5">
     <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center">
       <div className="flex items-center space-x-6 mb-2 md:mb-0">
-        <a href="tel:3464964500" className="flex items-center hover:text-red-300 transition-colors">
-          <Phone size={16} className="mr-2" />
+        <a href="tel:3464964500" className="flex items-center hover:text-white transition-colors">
+          <Phone size={14} className="mr-2 text-brand-accent" />
           (346) 496-4500
         </a>
-        <a href="mailto:contact@nobleroofing.co" className="flex items-center hover:text-red-300 transition-colors hidden sm:flex">
-          <Mail size={16} className="mr-2" />
+        <a href="mailto:contact@nobleroofing.co" className="flex items-center hover:text-white transition-colors hidden sm:flex">
+          <Mail size={14} className="mr-2 text-brand-accent" />
           contact@nobleroofing.co
         </a>
       </div>
-      <div className="flex items-center text-gray-300">
-        <MapPin size={16} className="mr-2" />
+      <div className="flex items-center">
+        <MapPin size={14} className="mr-2 text-brand-accent" />
         Houston & The Woodlands, TX
       </div>
     </div>
@@ -25,90 +85,87 @@ const TopBar = () => (
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   return (
-    <nav className="bg-white shadow-md sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto px-4 md:px-8 py-4 flex justify-between items-center">
+    <nav className="absolute top-0 w-full z-50 pt-10 px-4 md:px-8">
+      <div className="max-w-7xl mx-auto glass-panel rounded-full px-6 py-4 flex justify-between items-center">
         <div className="flex items-center">
-          <div className="text-3xl font-bold text-brand-navy tracking-tighter">NOBLE ROOFING</div>
+          <div className="text-2xl font-black text-white tracking-tighter">NOBLE<span className="text-brand-crimson">ROOFING</span></div>
         </div>
-        <div className="hidden md:flex items-center space-x-8 font-semibold text-brand-navy">
-          <a href="#services" className="hover:text-brand-crimson transition-colors">Services</a>
-          <a href="#calculator" className="hover:text-brand-crimson transition-colors">Estimator</a>
-          <a href="#about" className="hover:text-brand-crimson transition-colors">About Us</a>
-          <a href="#calculator" className="bg-brand-crimson text-white px-6 py-2 rounded font-bold hover:bg-red-800 transition-colors shadow-lg">
-            Instant Estimate
+        <div className="hidden md:flex items-center space-x-8 text-sm font-semibold text-gray-300">
+          <a href="#services" className="hover:text-white transition-colors">Services</a>
+          <a href="#calculator" className="hover:text-white transition-colors">Estimator</a>
+          <a href="#about" className="hover:text-white transition-colors">About Us</a>
+          <a href="#calculator" className="bg-brand-crimson text-white px-6 py-2.5 rounded-full font-bold hover:bg-brand-crimson_dark transition-all shadow-[0_0_20px_rgba(217,45,32,0.4)] flex items-center">
+            Instant Estimate <ArrowUpRight size={16} className="ml-1" />
           </a>
         </div>
         <div className="md:hidden">
-          <button onClick={() => setIsOpen(!isOpen)} className="text-brand-navy">
+          <button onClick={() => setIsOpen(!isOpen)} className="text-white">
             {isOpen ? <X size={28} /> : <Menu size={28} />}
           </button>
         </div>
       </div>
       {isOpen && (
-        <div className="md:hidden bg-white border-t p-4 flex flex-col space-y-4 font-semibold text-brand-navy">
+        <motion.div 
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="md:hidden glass-panel-dark mx-4 mt-2 rounded-2xl p-4 flex flex-col space-y-4 font-semibold text-gray-300"
+        >
           <a href="#services" onClick={() => setIsOpen(false)}>Services</a>
           <a href="#calculator" onClick={() => setIsOpen(false)}>Estimator</a>
           <a href="#about" onClick={() => setIsOpen(false)}>About Us</a>
           <a href="#calculator" onClick={() => setIsOpen(false)} className="text-brand-crimson font-bold">Instant Estimate</a>
-        </div>
+        </motion.div>
       )}
     </nav>
   );
 };
 
-const Hero = () => (
-  <div className="relative bg-brand-navy text-white overflow-hidden">
-    <div className="absolute inset-0 opacity-40">
-      <img 
-        src="https://images.unsplash.com/photo-1541888081622-df38d2a58b88?auto=format&fit=crop&q=80&w=2070" 
-        alt="Commercial Roof" 
-        className="w-full h-full object-cover"
-      />
-      <div className="absolute inset-0 bg-gradient-to-r from-brand-navy via-brand-navy/90 to-transparent"></div>
-    </div>
-    
-    <div className="relative max-w-7xl mx-auto px-4 md:px-8 py-24 md:py-32 flex flex-col items-start">
-      <div className="inline-block bg-brand-crimson text-white font-bold tracking-widest text-xs px-3 py-1 mb-6 uppercase rounded-sm">
-        Service with Integrity
-      </div>
-      <h1 className="text-5xl md:text-7xl font-extrabold leading-tight mb-6 max-w-4xl">
-        YOUR BUILDING. <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-400 to-brand-crimson">PROTECTED.</span><br />
-        YOUR PROJECT. <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-400 to-brand-crimson">ON SCHEDULE.</span>
-      </h1>
-      <p className="text-xl md:text-2xl text-gray-300 max-w-2xl mb-10 leading-relaxed font-light">
-        Manufacturer-certified commercial roofing systems — TPO, PVC, metal, modified bitumen, and coatings.
-      </p>
-      <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
-        <a href="#calculator" className="bg-brand-crimson text-white text-lg font-bold px-8 py-4 rounded shadow-xl shadow-red-900/50 hover:bg-red-800 transition-transform hover:-translate-y-1 flex items-center justify-center">
-          Request Instant Estimate <ChevronRight className="ml-2" />
-        </a>
-        <a href="tel:3464964500" className="bg-white/10 backdrop-blur-md border border-white/30 text-white text-lg font-bold px-8 py-4 rounded hover:bg-white/20 transition-colors flex items-center justify-center">
-          <Phone className="mr-2" size={20} /> Call Dispatch
-        </a>
-      </div>
-      <div className="mt-16 flex items-center space-x-6 text-sm text-gray-400 font-medium tracking-wide">
-        <span className="flex items-center"><CheckCircle2 className="mr-2 text-brand-crimson" size={18}/> Licensed & Insured</span>
-        <span className="flex items-center"><CheckCircle2 className="mr-2 text-brand-crimson" size={18}/> Veteran Supporting</span>
-      </div>
-    </div>
-  </div>
-);
-
-const Accreditations = () => (
-  <div className="bg-brand-gray py-8 border-b border-gray-200">
-    <div className="max-w-7xl mx-auto px-4 md:px-8">
-      <p className="text-center text-sm font-semibold text-gray-500 uppercase tracking-widest mb-6">Certified by Industry Leaders</p>
-      <div className="flex flex-wrap justify-center items-center gap-8 md:gap-16 opacity-70 grayscale hover:grayscale-0 transition-all duration-500">
-        <span className="text-xl font-bold text-gray-700">GAF Certified</span>
-        <span className="text-xl font-bold text-gray-700">Carlisle SynTec</span>
-        <span className="text-xl font-bold text-gray-700">CertainTeed Master</span>
-        <span className="text-xl font-bold text-gray-700">Sika Sarnafil</span>
-        <span className="text-xl font-bold text-gray-700">Malarkey</span>
-        <span className="text-xl font-bold text-gray-700">PAC-CLAD</span>
+const Hero = () => {
+  return (
+    <div className="relative min-h-screen bg-brand-navy flex items-center overflow-hidden">
+      {/* Background Gradients */}
+      <div className="absolute top-1/4 -left-1/4 w-[50vw] h-[50vw] bg-brand-crimson/20 rounded-full blur-[120px] mix-blend-screen pointer-events-none" />
+      <div className="absolute bottom-1/4 -right-1/4 w-[50vw] h-[50vw] bg-blue-900/20 rounded-full blur-[120px] mix-blend-screen pointer-events-none" />
+      
+      {/* 3D Scene */}
+      <Scene3D />
+      
+      <div className="relative max-w-7xl mx-auto px-4 md:px-8 pt-32 pb-20 w-full z-10 pointer-events-none">
+        <motion.div 
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1, delay: 0.2 }}
+          className="max-w-3xl"
+        >
+          <div className="inline-flex items-center glass-panel text-white font-bold tracking-widest text-[10px] px-4 py-2 mb-8 uppercase rounded-full border-brand-crimson/30">
+            <Zap size={12} className="mr-2 text-brand-crimson animate-pulse" />
+            Service with Integrity
+          </div>
+          <h1 className="text-6xl md:text-8xl font-black leading-[1.1] mb-6 tracking-tighter">
+            <span className="text-white">YOUR BUILDING.</span><br />
+            <span className="text-gradient-crimson">PROTECTED.</span>
+          </h1>
+          <p className="text-xl md:text-2xl text-gray-400 mb-10 leading-relaxed font-light max-w-xl">
+            Manufacturer-certified commercial roofing systems. Precision engineering meets unmatched integrity.
+          </p>
+          <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 pointer-events-auto">
+            <a href="#calculator" className="bg-brand-crimson text-white text-lg font-bold px-8 py-4 rounded-full shadow-[0_0_40px_rgba(217,45,32,0.4)] hover:shadow-[0_0_60px_rgba(217,45,32,0.6)] hover:bg-red-600 transition-all flex items-center justify-center hover:-translate-y-1">
+              Request Instant Estimate <ArrowUpRight className="ml-2" size={20} />
+            </a>
+            <a href="tel:3464964500" className="glass-panel text-white text-lg font-bold px-8 py-4 rounded-full hover:bg-white/10 transition-all flex items-center justify-center hover:-translate-y-1">
+              <Phone className="mr-2" size={20} /> Call Dispatch
+            </a>
+          </div>
+          
+          <div className="mt-16 flex items-center space-x-8 text-sm text-gray-500 font-medium tracking-wide">
+            <span className="flex items-center"><CheckCircle2 className="mr-2 text-brand-accent" size={16}/> Licensed & Insured</span>
+            <span className="flex items-center"><CheckCircle2 className="mr-2 text-brand-accent" size={16}/> Veteran Supporting</span>
+          </div>
+        </motion.div>
       </div>
     </div>
-  </div>
-);
+  );
+};
 
 const Calculator = () => {
   const [projectType, setProjectType] = useState('commercial_flat');
@@ -116,7 +173,6 @@ const Calculator = () => {
   const [urgency, setUrgency] = useState('inspection_only');
   const [showResult, setShowResult] = useState(false);
 
-  // Rough estimation logic for demo
   const getEstimate = () => {
     let base = 0;
     if (projectType === 'commercial_flat') base = 6;
@@ -130,87 +186,103 @@ const Calculator = () => {
   };
 
   return (
-    <div id="calculator" className="py-24 bg-white relative">
-      <div className="max-w-7xl mx-auto px-4 md:px-8 flex flex-col lg:flex-row gap-16 items-center">
-        <div className="lg:w-1/2">
-          <h2 className="text-4xl font-extrabold text-brand-navy mb-6 leading-tight">
-            Instant Commercial Roof Cost Estimator
+    <div id="calculator" className="py-32 bg-brand-navy_light relative overflow-hidden">
+      <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-brand-crimson/5 rounded-full blur-[100px] translate-x-1/2 -translate-y-1/2 pointer-events-none" />
+      
+      <div className="max-w-7xl mx-auto px-4 md:px-8 flex flex-col lg:flex-row gap-20 items-center relative z-10">
+        <motion.div 
+          initial={{ opacity: 0, x: -50 }}
+          whileInView={{ opacity: 1, x: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8 }}
+          className="lg:w-1/2"
+        >
+          <div className="inline-block text-brand-crimson font-bold tracking-widest text-sm mb-4 uppercase">AI-Powered Estimator</div>
+          <h2 className="text-5xl md:text-6xl font-black text-white mb-8 leading-tight tracking-tighter">
+            Numbers you can <span className="text-gradient-crimson">trust.</span> Instantly.
           </h2>
-          <p className="text-lg text-gray-600 mb-8 leading-relaxed">
-            Property managers and GCs need numbers fast. Use our interactive calculator to get an immediate baseline estimate for your upcoming project, then seamlessly book a specialized inspection.
+          <p className="text-xl text-gray-400 mb-10 leading-relaxed font-light">
+            Skip the waiting game. Use our interactive calculator to get an immediate, data-backed baseline estimate for your commercial project.
           </p>
           
-          <div className="space-y-6">
-            <div className="flex items-start">
-              <div className="bg-red-100 p-3 rounded-full mr-4 text-brand-crimson">
-                <Calendar size={24} />
+          <div className="space-y-8">
+            <div className="flex items-start group">
+              <div className="glass-panel p-4 rounded-2xl mr-6 text-brand-accent group-hover:scale-110 transition-transform">
+                <Calendar size={28} />
               </div>
               <div>
-                <h4 className="font-bold text-brand-navy text-xl">1-Click Booking</h4>
-                <p className="text-gray-600">Instantly route your inquiry to our dispatch team.</p>
+                <h4 className="font-bold text-white text-xl mb-1">1-Click Booking</h4>
+                <p className="text-gray-500">Instantly route your inquiry directly to our dispatch team.</p>
               </div>
             </div>
-            <div className="flex items-start">
-              <div className="bg-red-100 p-3 rounded-full mr-4 text-brand-crimson">
-                <Shield size={24} />
+            <div className="flex items-start group">
+              <div className="glass-panel p-4 rounded-2xl mr-6 text-brand-accent group-hover:scale-110 transition-transform">
+                <Shield size={28} />
               </div>
               <div>
-                <h4 className="font-bold text-brand-navy text-xl">Accurate Baselines</h4>
-                <p className="text-gray-600">Calculated based on current Houston material and labor rates.</p>
+                <h4 className="font-bold text-white text-xl mb-1">Accurate Baselines</h4>
+                <p className="text-gray-500">Calculated based on real-time Houston material and labor rates.</p>
               </div>
             </div>
           </div>
-        </div>
+        </motion.div>
 
-        <div className="lg:w-1/2 w-full">
-          <div className="bg-white rounded-2xl shadow-2xl p-8 border border-gray-100 relative overflow-hidden">
-            <div className="absolute top-0 left-0 w-full h-2 bg-brand-crimson"></div>
+        <motion.div 
+          initial={{ opacity: 0, y: 50 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8, delay: 0.2 }}
+          className="lg:w-1/2 w-full"
+        >
+          <div className="glass-panel-dark rounded-3xl p-8 md:p-10 relative overflow-hidden">
+            {/* Glowing border effect */}
+            <div className="absolute inset-0 bg-gradient-to-br from-brand-crimson/20 via-transparent to-blue-500/10 pointer-events-none" />
             
-            <div className="space-y-6">
+            <div className="space-y-8 relative z-10">
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">Project Type</label>
+                <label className="block text-sm font-bold text-gray-300 mb-3 uppercase tracking-wider">Project Type</label>
                 <div className="relative">
                   <select 
-                    className="w-full appearance-none border border-gray-300 rounded-lg py-3 px-4 bg-gray-50 focus:ring-2 focus:ring-brand-crimson focus:border-brand-crimson outline-none font-medium transition-shadow"
+                    className="w-full appearance-none bg-white/5 border border-white/10 text-white rounded-xl py-4 px-5 focus:ring-2 focus:ring-brand-crimson focus:border-transparent outline-none font-medium transition-all cursor-pointer backdrop-blur-md"
                     value={projectType}
                     onChange={(e) => {setProjectType(e.target.value); setShowResult(false);}}
                   >
-                    <option value="commercial_flat">Commercial Flat (TPO/PVC)</option>
-                    <option value="metal">Architectural/Structural Metal</option>
-                    <option value="coatings">Roof Coatings / Restoration</option>
-                    <option value="residential">Residential Replacement</option>
+                    <option value="commercial_flat" className="bg-brand-navy text-white">Commercial Flat (TPO/PVC)</option>
+                    <option value="metal" className="bg-brand-navy text-white">Architectural/Structural Metal</option>
+                    <option value="coatings" className="bg-brand-navy text-white">Roof Coatings / Restoration</option>
+                    <option value="residential" className="bg-brand-navy text-white">Residential Replacement</option>
                   </select>
-                  <ChevronDown className="absolute right-4 top-3.5 text-gray-400 pointer-events-none" size={20} />
+                  <ChevronDown className="absolute right-5 top-4.5 text-gray-400 pointer-events-none" size={20} />
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">Estimated Square Footage</label>
-                <div className="flex items-center space-x-4">
-                  <input 
-                    type="range" 
-                    min="1000" 
-                    max="100000" 
-                    step="1000"
-                    value={sqft}
-                    onChange={(e) => {setSqft(parseInt(e.target.value)); setShowResult(false);}}
-                    className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-brand-crimson"
-                  />
-                  <div className="w-24 text-right font-bold text-brand-navy text-lg">{sqft.toLocaleString()}</div>
+                <div className="flex justify-between mb-3">
+                  <label className="text-sm font-bold text-gray-300 uppercase tracking-wider">Estimated Square Footage</label>
+                  <span className="text-brand-crimson font-bold">{sqft.toLocaleString()} sq ft</span>
                 </div>
+                <input 
+                  type="range" 
+                  min="1000" 
+                  max="100000" 
+                  step="1000"
+                  value={sqft}
+                  onChange={(e) => {setSqft(parseInt(e.target.value)); setShowResult(false);}}
+                  className="w-full h-2 bg-white/10 rounded-lg appearance-none cursor-pointer accent-brand-crimson"
+                />
               </div>
 
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">Timeline / Urgency</label>
+                <label className="block text-sm font-bold text-gray-300 mb-3 uppercase tracking-wider">Timeline / Urgency</label>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   {['inspection_only', 'planning_budget', 'emergency_leak'].map((u) => (
                     <button
                       key={u}
                       onClick={() => {setUrgency(u); setShowResult(false);}}
-                      className={`py-2 px-3 border rounded-lg text-sm font-semibold transition-all ${
+                      className={`py-3 px-4 rounded-xl text-sm font-bold transition-all ${
                         urgency === u 
-                        ? 'bg-brand-navy border-brand-navy text-white shadow-md' 
-                        : 'bg-white border-gray-300 text-gray-600 hover:border-brand-navy'
+                        ? 'bg-brand-crimson text-white shadow-[0_0_20px_rgba(217,45,32,0.3)]' 
+                        : 'bg-white/5 border border-white/10 text-gray-400 hover:bg-white/10'
                       }`}
                     >
                       {u === 'inspection_only' && 'Routine Insp.'}
@@ -224,130 +296,109 @@ const Calculator = () => {
               {!showResult ? (
                 <button 
                   onClick={() => setShowResult(true)}
-                  className="w-full bg-brand-crimson text-white font-bold py-4 rounded-lg hover:bg-red-800 transition-colors shadow-lg shadow-red-900/20 text-lg flex justify-center items-center"
+                  className="w-full bg-white text-brand-navy font-black py-5 rounded-xl hover:bg-gray-200 transition-all text-lg flex justify-center items-center shadow-2xl hover:shadow-[0_0_30px_rgba(255,255,255,0.3)] hover:-translate-y-1"
                 >
-                  Calculate Estimate <ChevronRight className="ml-2" />
+                  Generate Estimate <ArrowUpRight className="ml-2" />
                 </button>
               ) : (
-                <div className="bg-brand-gray border border-gray-200 rounded-lg p-6 text-center animate-in fade-in slide-in-from-bottom-4 duration-500">
-                  <p className="text-sm font-bold text-gray-500 uppercase tracking-wide mb-1">Estimated Range</p>
-                  <p className="text-4xl font-extrabold text-brand-navy mb-6">{getEstimate()}</p>
+                <motion.div 
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="glass-panel bg-brand-crimson/10 border-brand-crimson/30 rounded-2xl p-8 text-center"
+                >
+                  <p className="text-xs font-bold text-brand-accent uppercase tracking-widest mb-2">Estimated Range</p>
+                  <p className="text-5xl font-black text-white mb-8 tracking-tighter">{getEstimate()}</p>
                   
                   <form className="space-y-4 text-left" onSubmit={(e) => e.preventDefault()}>
-                    <input type="text" placeholder="Your Name" className="w-full border border-gray-300 rounded py-2 px-3 focus:ring-1 focus:ring-brand-crimson outline-none" required />
-                    <input type="tel" placeholder="Phone Number" className="w-full border border-gray-300 rounded py-2 px-3 focus:ring-1 focus:ring-brand-crimson outline-none" required />
-                    <button className="w-full bg-brand-navy text-white font-bold py-3 rounded-lg hover:bg-gray-900 transition-colors flex justify-center items-center">
-                      <Calendar className="mr-2" size={18} /> Book On-Site Verification
+                    <input type="text" placeholder="Your Name" className="w-full bg-white/5 border border-white/10 text-white placeholder-gray-500 rounded-xl py-3 px-4 focus:ring-2 focus:ring-brand-crimson outline-none" required />
+                    <input type="tel" placeholder="Phone Number" className="w-full bg-white/5 border border-white/10 text-white placeholder-gray-500 rounded-xl py-3 px-4 focus:ring-2 focus:ring-brand-crimson outline-none" required />
+                    <button className="w-full bg-brand-crimson text-white font-bold py-4 rounded-xl hover:bg-red-700 transition-all flex justify-center items-center shadow-[0_0_20px_rgba(217,45,32,0.4)]">
+                      <Calendar className="mr-2" size={20} /> Request Official Proposal
                     </button>
-                    <p className="text-xs text-center text-gray-500 mt-2">No commitment required. Estimates are subject to field verification.</p>
+                    <p className="text-xs text-center text-gray-500 mt-3 font-medium">Estimates are subject to field verification.</p>
                   </form>
-                </div>
+                </motion.div>
               )}
             </div>
           </div>
-        </div>
+        </motion.div>
       </div>
     </div>
   );
 };
 
 const SocialProof = () => (
-  <div className="bg-brand-navy text-white py-24 relative overflow-hidden">
-    <div className="absolute top-0 right-0 w-96 h-96 bg-brand-crimson/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
-    <div className="max-w-4xl mx-auto px-4 md:px-8 text-center relative z-10">
-      <Award size={48} className="text-brand-crimson mx-auto mb-8" />
-      <h2 className="text-3xl md:text-5xl font-extrabold mb-10 leading-tight">Trusted by Houston's Top Property Managers</h2>
+  <div className="bg-brand-navy py-32 relative overflow-hidden">
+    <div className="max-w-5xl mx-auto px-4 md:px-8 text-center relative z-10">
+      <Award size={48} className="text-brand-accent mx-auto mb-8" />
+      <h2 className="text-4xl md:text-6xl font-black mb-16 leading-tight tracking-tighter text-white">
+        Trusted by Houston's <span className="text-gray-500">Top Property Managers</span>
+      </h2>
       
-      <div className="bg-white/5 backdrop-blur-sm border border-white/10 p-8 md:p-12 rounded-2xl">
-        <div className="flex justify-center text-yellow-400 mb-6">
-          {[1,2,3,4,5].map(i => <svg key={i} className="w-6 h-6 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>)}
+      <motion.div 
+        initial={{ opacity: 0, y: 30 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        className="glass-panel p-10 md:p-16 rounded-3xl relative"
+      >
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-brand-crimson text-white text-xs font-bold uppercase tracking-widest px-4 py-1 rounded-full">
+          Featured Review
         </div>
-        <p className="text-xl md:text-2xl font-medium italic text-gray-300 mb-8 leading-relaxed">
+        <div className="flex justify-center text-brand-accent mb-8">
+          {[1,2,3,4,5].map(i => <svg key={i} className="w-6 h-6 fill-current mx-1" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>)}
+        </div>
+        <p className="text-2xl md:text-3xl font-light italic text-gray-300 mb-10 leading-relaxed">
           "Noble Roofing handles our massive portfolios with absolute professionalism. Their team is responsive, their work is meticulous, and they understand the urgency of commercial properties."
         </p>
         <div>
-          <p className="font-bold text-lg">Jaime "Junior" Uniati Jr.</p>
-          <p className="text-brand-crimson font-medium">Chief Engineer / Property Manager, Colliers International</p>
+          <p className="font-bold text-xl text-white">Jaime "Junior" Uniati Jr.</p>
+          <p className="text-brand-accent font-medium mt-1">Chief Engineer / Property Manager, Colliers International</p>
         </div>
-      </div>
-    </div>
-  </div>
-);
-
-const Mission = () => (
-  <div id="about" className="py-24 bg-brand-gray">
-    <div className="max-w-7xl mx-auto px-4 md:px-8 flex flex-col md:flex-row gap-16 items-center">
-      <div className="md:w-1/2">
-        <img 
-          src="https://images.unsplash.com/photo-1593182440959-9d5165b29b59?auto=format&fit=crop&q=80&w=1470" 
-          alt="Noble Roofing Team" 
-          className="rounded-2xl shadow-2xl"
-        />
-      </div>
-      <div className="md:w-1/2">
-        <h3 className="text-brand-crimson font-bold tracking-widest uppercase mb-2">Our Foundation</h3>
-        <h2 className="text-4xl font-extrabold text-brand-navy mb-6">Built on Noble Plans</h2>
-        <p className="text-lg text-gray-600 mb-6 italic border-l-4 border-brand-crimson pl-4">
-          "But the noble make noble plans, and by noble deeds they stand." — Isaiah 32:8
-        </p>
-        <p className="text-gray-600 mb-8 leading-relaxed">
-          At Noble Roofing, our name isn't just a label; it's a standard. Founded by John Austin Earles, we believe in delivering uncompromising quality with absolute integrity. We treat every commercial property and residential home as if it were our own.
-        </p>
-        
-        <div className="bg-white p-6 rounded-xl shadow-md border border-gray-100">
-          <h4 className="font-bold text-brand-navy text-xl mb-3 flex items-center">
-            <Shield className="mr-2 text-brand-crimson" /> Community Impact
-          </h4>
-          <p className="text-gray-600 leading-relaxed">
-            We are proud to give back to those who served. Noble Roofing actively partners with the <strong>Mighty Oaks Foundation</strong> to support veteran service programs and mental health initiatives.
-          </p>
-        </div>
-      </div>
+      </motion.div>
     </div>
   </div>
 );
 
 const Footer = () => (
-  <footer className="bg-gray-900 text-gray-400 py-12">
-    <div className="max-w-7xl mx-auto px-4 md:px-8 grid grid-cols-1 md:grid-cols-3 gap-8">
-      <div>
-        <div className="text-2xl font-bold text-white tracking-tighter mb-4">NOBLE ROOFING</div>
-        <p className="mb-4">Service with Integrity. Greater Houston's premier commercial and residential roofing experts.</p>
+  <footer className="bg-[#02050a] text-gray-500 py-16 border-t border-white/5">
+    <div className="max-w-7xl mx-auto px-4 md:px-8 grid grid-cols-1 md:grid-cols-4 gap-12">
+      <div className="md:col-span-2">
+        <div className="text-3xl font-black text-white tracking-tighter mb-6">NOBLE<span className="text-brand-crimson">ROOFING</span></div>
+        <p className="mb-6 max-w-sm text-gray-400">Service with Integrity. Greater Houston's premier commercial and residential roofing experts.</p>
+        <div className="flex space-x-4">
+          <div className="w-10 h-10 rounded-full glass-panel flex items-center justify-center hover:bg-white/10 transition-colors cursor-pointer"><Shield size={18} className="text-white"/></div>
+          <div className="w-10 h-10 rounded-full glass-panel flex items-center justify-center hover:bg-white/10 transition-colors cursor-pointer"><Award size={18} className="text-white"/></div>
+        </div>
       </div>
       <div>
-        <h4 className="text-white font-bold mb-4 uppercase tracking-wider">Contact</h4>
-        <ul className="space-y-2">
-          <li className="flex items-center"><Phone size={16} className="mr-2 text-brand-crimson" /> (346) 496-4500</li>
-          <li className="flex items-center"><Mail size={16} className="mr-2 text-brand-crimson" /> contact@nobleroofing.co</li>
-          <li className="flex items-center"><MapPin size={16} className="mr-2 text-brand-crimson" /> 1019 Pruitt Rd, Spring, TX 77380</li>
+        <h4 className="text-white font-bold mb-6 uppercase tracking-wider text-sm">Contact</h4>
+        <ul className="space-y-4">
+          <li className="flex items-center hover:text-white transition-colors cursor-pointer"><Phone size={16} className="mr-3 text-brand-accent" /> (346) 496-4500</li>
+          <li className="flex items-center hover:text-white transition-colors cursor-pointer"><Mail size={16} className="mr-3 text-brand-accent" /> contact@nobleroofing.co</li>
+          <li className="flex items-start hover:text-white transition-colors cursor-pointer"><MapPin size={16} className="mr-3 mt-1 text-brand-accent shrink-0" /> 1019 Pruitt Rd, Spring, TX 77380</li>
         </ul>
       </div>
       <div>
-        <h4 className="text-white font-bold mb-4 uppercase tracking-wider">Services</h4>
-        <ul className="space-y-2">
-          <li>Commercial Flat Roofing (TPO/PVC)</li>
-          <li>Architectural Metal Systems</li>
-          <li>Roof Coatings & Restoration</li>
-          <li>Residential Roof Replacements</li>
+        <h4 className="text-white font-bold mb-6 uppercase tracking-wider text-sm">Services</h4>
+        <ul className="space-y-3">
+          <li className="hover:text-white transition-colors cursor-pointer">Commercial Flat Roofing</li>
+          <li className="hover:text-white transition-colors cursor-pointer">Architectural Metal</li>
+          <li className="hover:text-white transition-colors cursor-pointer">Roof Coatings</li>
+          <li className="hover:text-white transition-colors cursor-pointer">Residential Replacements</li>
         </ul>
       </div>
-    </div>
-    <div className="max-w-7xl mx-auto px-4 md:px-8 mt-12 pt-8 border-t border-gray-800 text-sm text-center">
-      &copy; {new Date().getFullYear()} Noble Roofing. All rights reserved. Prototype for demonstration purposes.
     </div>
   </footer>
 );
 
 function App() {
   return (
-    <div className="font-sans antialiased text-gray-900 selection:bg-brand-crimson selection:text-white">
+    <div className="font-sans min-h-screen bg-brand-navy">
       <TopBar />
       <Navbar />
       <Hero />
-      <Accreditations />
       <Calculator />
       <SocialProof />
-      <Mission />
       <Footer />
     </div>
   );

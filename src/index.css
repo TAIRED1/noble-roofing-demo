@@ -5,5 +5,29 @@
 @layer base {
   html {
     scroll-behavior: smooth;
+    background-color: #050a15;
+    color: #f8fafc;
+  }
+  
+  body {
+    @apply antialiased selection:bg-brand-crimson selection:text-white;
+  }
+}
+
+@layer utilities {
+  .glass-panel {
+    @apply bg-white/5 backdrop-blur-xl border border-white/10 shadow-2xl;
+  }
+  
+  .glass-panel-dark {
+    @apply bg-black/40 backdrop-blur-2xl border border-white/5 shadow-2xl;
+  }
+
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-white via-gray-200 to-gray-500;
+  }
+
+  .text-gradient-crimson {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-red-400 via-brand-crimson to-red-900;
   }
 }
