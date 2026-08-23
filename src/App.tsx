@@ -1,385 +1,488 @@
-import React from 'react';
-import { motion, useScroll, useTransform } from 'framer-motion';
-import { Phone, Mail, MapPin, ChevronRight, Star, Quote, HardHat, ShieldCheck, Wrench, Menu, X, ArrowRight } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Phone, Mail, MapPin, Shield, Star, Menu, X, Headphones, AlertTriangle, Calendar } from 'lucide-react';
 
-const stats = [
-  { label: 'Certified Installers', value: '100%' },
-  { label: 'Projects Completed', value: '500+' },
-  { label: 'Years Experience', value: '15+' },
-];
+const ParticleCanvas = () => {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
 
-const services = [
-  {
-    title: 'Overlays & Recovers',
-    desc: 'Install a new TPO, PVC, or modified bitumen membrane directly over your existing roof. Saves time, reduces cost, and preserves your manufacturer warranty.'
-  },
-  {
-    title: 'Full Tear-Off & Replacement',
-    desc: 'Complete removal and new system installation.'
-  },
-  {
-    title: 'Roof Coatings',
-    desc: 'Elastomeric and silicone coating systems.'
-  },
-  {
-    title: 'Leak Detection & Repair',
-    desc: 'Emergency and scheduled repair services.'
-  },
-  {
-    title: 'Preventive Maintenance',
-    desc: 'Scheduled inspection programs.'
-  },
-  {
-    title: 'Metal Roofing',
-    desc: 'Standing seam and architectural metal systems.'
-  }
-];
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
 
-const values = [
-  {
-    title: 'Honesty',
-    icon: <ShieldCheck className="w-12 h-12 text-brand-crimson mb-4" />,
-    desc: 'We communicate openly and truthfully with every client — clear expectations, straight answers, and no surprises.'
-  },
-  {
-    title: 'Excellence',
-    icon: <Star className="w-12 h-12 text-brand-crimson mb-4" />,
-    desc: 'We pursue the highest standard in every project, delivering superior craftsmanship, exceptional service, and outstanding results.'
-  },
-  {
-    title: 'Integrity',
-    icon: <HardHat className="w-12 h-12 text-brand-crimson mb-4" />,
-    desc: 'We do the right thing even when no one is watching, ensuring every action reflects our commitment to fairness and quality.'
-  }
-];
+    let width = canvas.width = window.innerWidth;
+    let height = canvas.height = window.innerHeight;
 
-const reviews = [
-  {
-    name: 'Micah Marcel',
-    date: 'Jul 2026',
-    text: "I highly recommend Noble Roofing. They recently completed a commercial reroof project at a property we manage, and they were great to work with. You never have to worry when you're working with Noble."
-  },
-  {
-    name: 'Josh McKibben',
-    date: 'Nov 2024',
-    text: "John and his professional team just completed a substantial TPO Membrane Roofing System for my property in Dallas. We presented many challenges to Noble Roofing along the way and John was able to address them quickly."
-  },
-  {
-    name: 'charlesdekanter',
-    date: 'Jul 2026',
-    text: "Working with John and Noble Roofing was a great experience from the very beginning. I called on a whim on Sunday to leave a message for a callback. John (Owner) answered the phone himself and spent almost half an hour answering my questions."
-  },
-  {
-    name: 'Property Manager',
-    date: 'Sep 2025',
-    text: "I manage a commercial property in Houston but reside in Idaho. When one of my tenants called with a roof leak, I sent several messages to a number of companies and Noble was the 1st to respond."
-  },
-  {
-    name: 'Paula Foore',
-    date: 'Dec 2025',
-    text: "When we needed a new roof I was concerned about finding a roofer that I could trust. But the crew was SO professional and the owner kept us up to date through the entire process with drone photos."
-  }
-];
+    const particles: { x: number; y: number; vx: number; vy: number; radius: number }[] = [];
+    for (let i = 0; i < 80; i++) {
+      particles.push({
+        x: Math.random() * width,
+        y: Math.random() * height,
+        vx: (Math.random() - 0.5) * 0.5,
+        vy: (Math.random() - 0.5) * 0.5,
+        radius: Math.random() * 1.5 + 0.5
+      });
+    }
 
-const partners = [
-  'GAF Certified',
-  'Carlisle SynTec',
-  'CertainTeed',
-  'Sika Sarnafil',
-  'Malarkey',
-  'PAC-CLAD',
-  'Berridge'
-];
+    const animate = () => {
+      ctx.clearRect(0, 0, width, height);
 
-export default function App() {
-  const { scrollY } = useScroll();
-  const y = useTransform(scrollY, [0, 500], [0, 150]);
-  const [isMenuOpen, setIsMenuOpen] = React.useState(false);
+      // Radial gradients
+      const grad1 = ctx.createRadialGradient(width * 0.2, height * 0.2, 0, width * 0.2, height * 0.2, width * 0.5);
+      grad1.addColorStop(0, 'rgba(158, 27, 39, 0.15)');
+      grad1.addColorStop(1, 'transparent');
+      ctx.fillStyle = grad1;
+      ctx.fillRect(0, 0, width, height);
+
+      const grad2 = ctx.createRadialGradient(width * 0.8, height * 0.8, 0, width * 0.8, height * 0.8, width * 0.5);
+      grad2.addColorStop(0, 'rgba(15, 30, 60, 0.2)');
+      grad2.addColorStop(1, 'transparent');
+      ctx.fillStyle = grad2;
+      ctx.fillRect(0, 0, width, height);
+
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+      
+      for (let i = 0; i < particles.length; i++) {
+        const p = particles[i];
+        p.x += p.vx;
+        p.y += p.vy;
+
+        if (p.x < 0 || p.x > width) p.vx *= -1;
+        if (p.y < 0 || p.y > height) p.vy *= -1;
+
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+        ctx.fill();
+
+        for (let j = i + 1; j < particles.length; j++) {
+          const p2 = particles[j];
+          const dx = p.x - p2.x;
+          const dy = p.y - p2.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+
+          if (dist < 100) {
+            ctx.beginPath();
+            ctx.moveTo(p.x, p.y);
+            ctx.lineTo(p2.x, p2.y);
+            ctx.strokeStyle = `rgba(158, 27, 39, ${0.2 * (1 - dist / 100)})`;
+            ctx.stroke();
+          }
+        }
+      }
+
+      requestAnimationFrame(animate);
+    };
+
+    const animationId = requestAnimationFrame(animate);
+
+    const handleResize = () => {
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+    };
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      cancelAnimationFrame(animationId);
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
+
+  return <canvas ref={canvasRef} className="fixed inset-0 pointer-events-none z-[-1]" />;
+};
+
+const EmberParticles = () => {
+  return (
+    <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+      {Array.from({ length: 15 }).map((_, i) => (
+        <div
+          key={i}
+          className="ember"
+          style={{
+            left: `${Math.random() * 100}%`,
+            top: '100%',
+            animationDelay: `${Math.random() * 5}s`,
+            animationDuration: `${5 + Math.random() * 10}s`
+          }}
+        />
+      ))}
+    </div>
+  );
+};
+
+const TopBar = () => (
+  <div className="w-full bg-white/[0.02] border-b border-white/[0.05] text-[11px] text-gray-400 py-1.5 px-4 flex justify-between items-center z-50 relative">
+    <div className="flex items-center gap-4">
+      <span className="flex items-center gap-1.5"><Phone size={12} className="text-[#9e1b27]"/> (346) 496-4500</span>
+      <span className="flex items-center gap-1.5"><Mail size={12} className="text-[#9e1b27]"/> contact@nobleroofing.co</span>
+    </div>
+    <div className="flex items-center gap-1.5">
+      <MapPin size={12} className="text-[#9e1b27]"/> The Woodlands & Greater Houston, TX
+    </div>
+  </div>
+);
+
+const Navbar = () => {
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
-    <div className="bg-brand-navy min-h-screen text-white font-montserrat overflow-hidden">
-      
-      {/* Navigation */}
-      <nav className="fixed w-full z-50 bg-brand-navy/90 backdrop-blur-md border-b border-white/10">
-        <div className="container mx-auto px-6 py-4 flex justify-between items-center">
-          <div className="flex items-center space-x-2">
-            <span className="font-bebas text-3xl tracking-wider text-white">NOBLE<span className="text-brand-crimson">ROOFING</span></span>
-          </div>
-          
-          <div className="hidden md:flex items-center space-x-8">
-            <a href="#services" className="text-sm font-medium hover:text-brand-crimson transition-colors">Services</a>
-            <a href="#process" className="text-sm font-medium hover:text-brand-crimson transition-colors">Process</a>
-            <a href="#reviews" className="text-sm font-medium hover:text-brand-crimson transition-colors">Reviews</a>
-            <a href="tel:3464964500" className="bg-brand-crimson text-white px-6 py-2 rounded-sm font-bold text-sm tracking-wider hover:bg-white hover:text-brand-crimson transition-all flex items-center">
-              <Phone className="w-4 h-4 mr-2" /> (346) 496-4500
-            </a>
-          </div>
+    <nav className="sticky top-0 z-40 glass border-b-0">
+      <div className="max-w-7xl mx-auto px-4 md:px-8 py-4 flex justify-between items-center relative">
+        <div className="flex items-center gap-2">
+          <span className="font-bebas text-2xl tracking-widest text-white">NOBLE</span>
+          <span className="font-bebas text-2xl tracking-widest text-[#9e1b27]">ROOFING</span>
+        </div>
+        
+        <div className="hidden md:flex items-center gap-8 text-sm font-medium tracking-wide">
+          <a href="#services" className="hover:text-[#9e1b27] transition-colors">Services</a>
+          <a href="#" className="hover:text-[#9e1b27] transition-colors">Credentials</a>
+          <a href="#" className="hover:text-[#9e1b27] transition-colors">Mission</a>
+        </div>
 
-          <button className="md:hidden text-white" onClick={() => setIsMenuOpen(!isMenuOpen)}>
-            {isMenuOpen ? <X /> : <Menu />}
+        <div className="hidden md:flex items-center">
+          <button className="glass border border-[#9e1b27] text-white px-5 py-2 text-sm font-semibold hover:bg-[#9e1b27]/10 transition-colors flex items-center gap-2 relative">
+            <span className="w-2 h-2 rounded-full bg-[#22c55e] radar-pulse relative z-10" />
+            Dispatch Concierge
           </button>
         </div>
 
-        {/* Mobile menu */}
-        {isMenuOpen && (
-          <div className="md:hidden bg-brand-navy p-6 flex flex-col space-y-4 border-b border-white/10">
-            <a href="#services" onClick={() => setIsMenuOpen(false)}>Services</a>
-            <a href="#process" onClick={() => setIsMenuOpen(false)}>Process</a>
-            <a href="#reviews" onClick={() => setIsMenuOpen(false)}>Reviews</a>
-          </div>
-        )}
-      </nav>
+        <button className="md:hidden" onClick={() => setMobileOpen(!mobileOpen)}>
+          {mobileOpen ? <X size={24} /> : <Menu size={24} />}
+        </button>
+      </div>
 
-      {/* Hero */}
-      <section className="relative h-screen flex items-center pt-20 overflow-hidden">
-        <motion.div style={{ y }} className="absolute inset-0 z-0">
-          <div className="absolute inset-0 bg-gradient-to-r from-brand-navy via-brand-navy/80 to-transparent z-10" />
-          <img 
-            src="https://images.unsplash.com/photo-1541889814420-1a741168ebfa?auto=format&fit=crop&q=80&w=2000" 
-            alt="Commercial Roofing" 
-            className="w-full h-full object-cover opacity-50"
-          />
+      <AnimatePresence>
+        {mobileOpen && (
+          <motion.div 
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="md:hidden absolute top-full left-0 w-full glass-strong border-b border-white/[0.05] p-4 flex flex-col gap-4"
+          >
+            <a href="#services" onClick={() => setMobileOpen(false)}>Services</a>
+            <a href="#">Credentials</a>
+            <a href="#">Mission</a>
+            <button className="border border-[#9e1b27] text-white px-5 py-2 text-sm font-semibold flex items-center gap-2 w-max">
+              <span className="w-2 h-2 rounded-full bg-[#22c55e] radar-pulse relative z-10" />
+              Dispatch Concierge
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </nav>
+  );
+};
+
+const Hero = () => {
+  return (
+    <section className="relative min-h-[90vh] flex flex-col justify-center px-4 md:px-8 z-10 pt-20 pb-10">
+      <div className="max-w-7xl mx-auto w-full flex flex-col gap-8">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+          className="glass-strong w-max px-4 py-1.5 rounded-full flex items-center gap-3 border-[#22c55e]/30 border"
+        >
+          <div className="w-2 h-2 rounded-full bg-[#22c55e] radar-pulse relative" />
+          <span className="text-xs font-semibold tracking-wider text-[#22c55e]">Greater Houston & The Woodlands — Commercial Dispatch Active</span>
         </motion.div>
 
-        <div className="container mx-auto px-6 relative z-10">
-          <div className="max-w-3xl">
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8 }}
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.1 }}
+        >
+          <h1 className="text-6xl md:text-8xl font-bebas leading-[0.9] tracking-tight">
+            BUILT WITH PRECISION.<br />
+            <span className="bg-gradient-to-r from-[#9e1b27] to-[#ff4d5e] bg-clip-text text-transparent text-glow">BACKED BY NOBLE PLANS.</span>
+          </h1>
+        </motion.div>
+
+        <motion.p 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.2 }}
+          className="max-w-3xl text-gray-300 text-lg md:text-xl font-light leading-relaxed"
+        >
+          Manufacturer-certified commercial roofing systems — TPO, PVC, metal, modified bitumen, and elastomeric coatings. Direct ownership access. OSHA-compliant execution.
+        </motion.p>
+
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.3 }}
+          className="flex flex-wrap gap-4 mt-4"
+        >
+          <button className="bg-[#9e1b27] glow-crimson text-white px-8 py-4 font-semibold hover:bg-[#b01e2c] transition-colors">
+            Schedule Urgent Inspection
+          </button>
+          <button className="glass border border-white/20 px-8 py-4 font-semibold hover:bg-white/5 transition-colors flex items-center gap-2">
+            <Phone size={18} /> Call Dispatch (346) 496-4500
+          </button>
+        </motion.div>
+
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.4 }}
+          className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-4 glass-strong p-6"
+        >
+          {[
+            { value: "30-Year", label: "Manufacturer Warranty" },
+            { value: "100%", label: "On-Schedule Delivery" },
+            { value: "< 60 Min", label: "Emergency Response" },
+            { value: "Carlisle & GAF", label: "Certified Installer" }
+          ].map((stat, i) => (
+            <div key={i} className="flex flex-col gap-1 border-l border-white/10 pl-4 first:border-l-0 first:pl-0">
+              <span className="font-bebas text-2xl md:text-3xl text-[#9e1b27]">{stat.value}</span>
+              <span className="text-xs text-gray-400 uppercase tracking-widest">{stat.label}</span>
+            </div>
+          ))}
+        </motion.div>
+      </div>
+    </section>
+  );
+};
+
+const Services = () => {
+  const [activeTab, setActiveTab] = useState<'commercial' | 'residential'>('commercial');
+
+  const commercialServices = [
+    {
+      title: "TPO & PVC Single-Ply",
+      desc: "Industry-leading thermoplastic membranes for flat and low-slope commercial applications. Energy-efficient, UV-resistant, and backed by manufacturer warranties up to 30 years."
+    },
+    {
+      title: "Architectural Standing Seam Metal",
+      desc: "Premium metal roofing systems engineered for longevity. Concealed fastener panels rated for 140+ mph wind uplift with integrated snow and water management."
+    },
+    {
+      title: "Liquid Applied Membranes",
+      desc: "Seamless elastomeric and silicone coating systems. Ideal for roof restoration, extending service life by 15-20 years without full tear-off."
+    }
+  ];
+
+  const residentialServices = [
+    {
+      title: "Composition Shingles",
+      desc: "GAF HDZ and CertainTeed Landmark premium shingle systems with manufacturer-certified installation and extended warranty coverage."
+    },
+    {
+      title: "Metal Roofing",
+      desc: "Standing seam and exposed fastener metal systems for residential applications. Durable, energy-efficient, and architecturally striking."
+    },
+    {
+      title: "Storm Damage Restoration",
+      desc: "Full-service storm damage assessment, insurance claim support, and rapid restoration for hail, wind, and hurricane-impacted homes."
+    }
+  ];
+
+  const currentServices = activeTab === 'commercial' ? commercialServices : residentialServices;
+
+  return (
+    <section id="services" className="py-24 px-4 md:px-8 relative z-10">
+      <div className="max-w-7xl mx-auto">
+        <h2 className="text-4xl md:text-5xl font-bebas mb-12 text-center text-glow">ENGINEERED ROOFING SYSTEMS</h2>
+        
+        <div className="flex justify-center gap-4 mb-12">
+          <button 
+            onClick={() => setActiveTab('commercial')}
+            className={`px-6 py-3 font-semibold transition-all ${activeTab === 'commercial' ? 'bg-[#9e1b27] glow-crimson' : 'glass border border-white/10'}`}
+          >
+            Commercial Systems
+          </button>
+          <button 
+            onClick={() => setActiveTab('residential')}
+            className={`px-6 py-3 font-semibold transition-all ${activeTab === 'residential' ? 'bg-[#9e1b27] glow-crimson' : 'glass border border-white/10'}`}
+          >
+            Residential Solutions
+          </button>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <AnimatePresence mode="wait">
+            {currentServices.map((service, i) => (
+              <motion.div 
+                key={service.title}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.3, delay: i * 0.1 }}
+                className="glass p-8 relative group hover:glow-crimson transition-all duration-300"
+              >
+                <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-[#9e1b27] to-transparent opacity-50 group-hover:opacity-100 transition-opacity" />
+                <h3 className="text-xl font-bebas mb-4 tracking-wider">{service.title}</h3>
+                <p className="text-sm text-gray-400 leading-relaxed">{service.desc}</p>
+              </motion.div>
+            ))}
+          </AnimatePresence>
+        </div>
+      </div>
+    </section>
+  );
+};
+
+const SocialProof = () => (
+  <section className="py-24 px-4 md:px-8 relative z-10 bg-black/50">
+    <div className="max-w-4xl mx-auto flex flex-col gap-12">
+      <h2 className="text-3xl md:text-4xl font-bebas text-center">TRUSTED BY HOUSTON'S TOP PROPERTY MANAGERS</h2>
+      
+      <div className="glass-strong glow-crimson p-8 md:p-12 relative">
+        <div className="flex gap-1 text-yellow-400 mb-6">
+          {[...Array(5)].map((_, i) => <Star key={i} size={20} fill="currentColor" />)}
+        </div>
+        <p className="text-lg md:text-xl italic font-light text-gray-200 mb-8 leading-relaxed">
+          "I've been in commercial property engineering for over 30 years. Noble Roofing handles our portfolios at Colliers with absolute professionalism — responsive, meticulous, and they understand the urgency of commercial properties. I trust them completely."
+        </p>
+        <div>
+          <h4 className="font-bebas text-xl text-[#9e1b27]">Jaime 'Junior' Uniati Jr.</h4>
+          <p className="text-sm text-gray-400">Chief Engineer / Property Manager</p>
+          <p className="text-sm text-gray-500 font-semibold mt-1">Colliers International</p>
+        </div>
+      </div>
+
+      <div className="glass p-6 flex items-center gap-6 border-l-4 border-[#22c55e]">
+        <Shield size={32} className="text-[#22c55e] shrink-0" />
+        <p className="text-sm text-gray-300 leading-relaxed">
+          <strong className="text-white block mb-1">Community Impact</strong>
+          Proud partner of the Mighty Oaks Foundation, supporting veteran service programs and mental health initiatives.
+        </p>
+      </div>
+    </div>
+  </section>
+);
+
+const Accreditations = () => (
+  <section className="py-12 border-y border-white/5 relative z-10 glass">
+    <div className="max-w-7xl mx-auto px-4 md:px-8 flex flex-col gap-6">
+      <h2 className="text-center text-sm tracking-widest text-gray-500 uppercase font-semibold">CERTIFIED BY INDUSTRY LEADERS</h2>
+      <div className="flex flex-wrap justify-center items-center gap-8 md:gap-16">
+        {['Carlisle SynTec', 'GAF Certified', 'CertainTeed Master', 'Sika Sarnafil', 'PAC-CLAD'].map((brand, i) => (
+          <span key={i} className="font-bebas text-2xl md:text-3xl text-gray-400 opacity-60 hover:opacity-100 hover:text-[#9e1b27] hover:text-glow transition-all cursor-default">
+            {brand}
+          </span>
+        ))}
+      </div>
+    </div>
+  </section>
+);
+
+const Footer = () => (
+  <footer className="pt-24 pb-8 px-4 md:px-8 relative z-10 glass-strong">
+    <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 mb-16">
+      <div className="flex flex-col gap-6">
+        <div className="flex items-center gap-2">
+          <span className="font-bebas text-3xl tracking-widest text-white">NOBLE</span>
+          <span className="font-bebas text-3xl tracking-widest text-[#9e1b27]">ROOFING</span>
+        </div>
+        <p className="text-sm text-gray-400 max-w-md leading-relaxed">
+          Engineered commercial and residential roofing systems for Greater Houston and The Woodlands. Built with precision, backed by Noble plans.
+        </p>
+        <div className="flex flex-col gap-3 text-sm text-gray-300 mt-4">
+          <span className="flex items-center gap-3"><Phone size={16} className="text-[#9e1b27]" /> (346) 496-4500</span>
+          <span className="flex items-center gap-3"><Mail size={16} className="text-[#9e1b27]" /> contact@nobleroofing.co</span>
+          <span className="flex items-center gap-3"><MapPin size={16} className="text-[#9e1b27]" /> The Woodlands, TX</span>
+        </div>
+      </div>
+      
+      <div className="grid grid-cols-2 gap-8 md:justify-self-end">
+        <div className="flex flex-col gap-4">
+          <h4 className="font-bebas text-xl text-white tracking-widest">Services</h4>
+          <a href="#" className="text-sm text-gray-400 hover:text-[#9e1b27] transition-colors">Commercial Roofing</a>
+          <a href="#" className="text-sm text-gray-400 hover:text-[#9e1b27] transition-colors">Residential Roofing</a>
+          <a href="#" className="text-sm text-gray-400 hover:text-[#9e1b27] transition-colors">Storm Restoration</a>
+          <a href="#" className="text-sm text-gray-400 hover:text-[#9e1b27] transition-colors">Maintenance</a>
+        </div>
+        <div className="flex flex-col gap-4">
+          <h4 className="font-bebas text-xl text-white tracking-widest">Quick Links</h4>
+          <a href="#" className="text-sm text-gray-400 hover:text-[#9e1b27] transition-colors">About Us</a>
+          <a href="#" className="text-sm text-gray-400 hover:text-[#9e1b27] transition-colors">Credentials</a>
+          <a href="#" className="text-sm text-gray-400 hover:text-[#9e1b27] transition-colors">Contact</a>
+        </div>
+      </div>
+    </div>
+    
+    <div className="max-w-7xl mx-auto pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-gray-500">
+      <p className="italic font-serif">"But the noble make noble plans, and by noble deeds they stand." — Isaiah 32:8</p>
+      <p>&copy; {new Date().getFullYear()} Noble Roofing. All rights reserved.</p>
+    </div>
+  </footer>
+);
+
+const ConciergeModal = () => {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <>
+      <button 
+        onClick={() => setOpen(true)}
+        className="fixed bottom-6 right-6 z-50 w-14 h-14 bg-[#9e1b27] rounded-full glow-crimson flex items-center justify-center hover:bg-[#b01e2c] transition-colors group"
+      >
+        <span className="absolute inset-0 rounded-full bg-[#9e1b27] animate-ping opacity-20" />
+        <Headphones size={24} className="text-white group-hover:scale-110 transition-transform" />
+      </button>
+
+      <AnimatePresence>
+        {open && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+          >
+            <motion.div 
+              initial={{ y: "100%" }}
+              animate={{ y: 0 }}
+              exit={{ y: "100%" }}
+              transition={{ type: "spring", damping: 25, stiffness: 200 }}
+              className="w-full max-w-md glass-strong border-t md:border border-white/20 p-6 md:p-8 relative rounded-t-2xl sm:rounded-2xl shadow-2xl"
             >
-              <div className="inline-flex items-center space-x-2 bg-brand-crimson/20 border border-brand-crimson/50 text-brand-crimson px-4 py-1.5 rounded-full text-sm font-semibold tracking-wider mb-6">
-                <ShieldCheck className="w-4 h-4" />
-                <span>COMMERCIAL ROOFING EXPERTS</span>
-              </div>
-              <h1 className="font-bebas text-6xl md:text-8xl leading-none mb-6">
-                COMMERCIAL ROOFING IN THE WOODLANDS, TX <br/>
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-crimson to-red-500">
-                  & GREATER HOUSTON AREA
-                </span>
-              </h1>
-              <p className="text-lg md:text-xl text-gray-300 leading-relaxed mb-8 max-w-2xl">
-                Property managers, building owners, and general contractors across Greater Houston choose Noble Roofing for one reason: we do what we say. Direct access to ownership. Commercial-scale execution. Certified installations backed by the industry's leading manufacturers.
-              </p>
+              <button onClick={() => setOpen(false)} className="absolute top-4 right-4 text-gray-400 hover:text-white">
+                <X size={20} />
+              </button>
               
-              <div className="flex flex-col sm:flex-row gap-4">
-                <a href="tel:3464964500" className="bg-brand-crimson hover:bg-white hover:text-brand-crimson text-white px-8 py-4 rounded-sm font-bold text-lg tracking-wider transition-all flex items-center justify-center">
-                  CALL FOR INSPECTION <ArrowRight className="w-5 h-5 ml-2" />
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-2 h-2 rounded-full bg-[#22c55e] radar-pulse relative" />
+                <h3 className="font-bebas text-3xl tracking-widest text-white">24/7 DISPATCH CONCIERGE</h3>
+              </div>
+              <p className="text-sm text-gray-400 mb-8">Route your urgent request directly to our commercial team.</p>
+              
+              <div className="flex flex-col gap-4">
+                <button className="w-full bg-[#9e1b27] glow-crimson text-white py-4 font-semibold flex items-center justify-center gap-2 hover:bg-[#b01e2c] transition-colors">
+                  <AlertTriangle size={18} /> Report Active Leak
+                </button>
+                <button className="w-full glass border border-white/20 text-white py-4 font-semibold flex items-center justify-center gap-2 hover:bg-white/5 transition-colors">
+                  <Calendar size={18} /> Schedule Inspection
+                </button>
+              </div>
+
+              <div className="mt-8 text-center border-t border-white/10 pt-6">
+                <p className="text-sm text-gray-400">Or call directly:</p>
+                <a href="tel:3464964500" className="text-2xl font-bebas text-[#9e1b27] text-glow mt-1 inline-block hover:scale-105 transition-transform">
+                  (346) 496-4500
                 </a>
               </div>
             </motion.div>
-          </div>
-        </div>
-      </section>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
+  );
+};
 
-      {/* Stats Counter */}
-      <section className="border-y border-white/10 bg-brand-navy/50 backdrop-blur-sm relative z-20">
-        <div className="container mx-auto px-6 py-12">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
-            {stats.map((stat, i) => (
-              <motion.div 
-                key={i}
-                initial={{ opacity: 0, scale: 0.9 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
-                className="flex flex-col items-center"
-              >
-                <span className="font-bebas text-5xl text-brand-crimson mb-2">{stat.value}</span>
-                <span className="text-gray-400 font-medium tracking-widest uppercase text-sm">{stat.label}</span>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Services Section */}
-      <section id="services" className="py-24 relative">
-        <div className="container mx-auto px-6">
-          <div className="text-center mb-16">
-            <h2 className="font-bebas text-5xl md:text-6xl mb-4">OUR COMMERCIAL <span className="text-brand-crimson">SERVICES</span></h2>
-            <p className="text-gray-400 max-w-2xl mx-auto">Your Trusted Partner for All Commercial Roofing Services</p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {services.map((service, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
-                className="bg-white/5 border border-white/10 p-8 rounded-lg hover:bg-white/10 transition-colors group cursor-pointer"
-              >
-                <Wrench className="w-8 h-8 text-brand-crimson mb-6 group-hover:scale-110 transition-transform" />
-                <h3 className="font-bebas text-2xl mb-3 tracking-wide">{service.title}</h3>
-                <p className="text-gray-400 text-sm leading-relaxed">{service.desc}</p>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Process Section */}
-      <section id="process" className="py-24 bg-gradient-to-b from-brand-navy to-black">
-        <div className="container mx-auto px-6">
-          <div className="text-center mb-20">
-            <h2 className="font-bebas text-5xl md:text-6xl mb-4">WORKING WITH NOBLE IS <span className="text-brand-crimson">SIMPLE</span></h2>
-          </div>
-
-          <div className="relative max-w-4xl mx-auto">
-            {/* Connecting line */}
-            <div className="absolute left-1/2 top-0 bottom-0 w-px bg-brand-crimson/30 hidden md:block" />
-
-            <div className="space-y-12">
-              {[
-                { title: 'Schedule Your Inspection', desc: 'We look, listen, and document every finding with photos — no scare tactics, just facts.' },
-                { title: 'Review Your Proposal', desc: 'Clear scope, manufacturer-spec materials, and honest pricing — no hidden costs or surprises.' },
-                { title: 'Watch It Get Done Right', desc: 'On schedule and OSHA-compliant, with clear updates at every phase of the job.' }
-              ].map((step, i) => (
-                <motion.div 
-                  key={i}
-                  initial={{ opacity: 0, x: i % 2 === 0 ? -20 : 20 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true }}
-                  className={`flex flex-col md:flex-row items-center gap-8 ${i % 2 === 0 ? 'md:flex-row-reverse' : ''}`}
-                >
-                  <div className="flex-1 w-full md:text-right" style={{ textAlign: i % 2 === 0 ? 'left' : 'right' }}>
-                    <div className={`md:hidden font-bebas text-6xl text-brand-crimson/20 mb-2 absolute -z-10 -mt-8 ml-4`}>0{i+1}</div>
-                    <h3 className="font-bebas text-3xl mb-2">{step.title}</h3>
-                    <p className="text-gray-400">{step.desc}</p>
-                  </div>
-                  <div className="w-16 h-16 rounded-full bg-brand-crimson text-white font-bebas text-2xl flex items-center justify-center shrink-0 z-10 shadow-[0_0_30px_rgba(185,30,49,0.3)]">
-                    {i + 1}
-                  </div>
-                  <div className="flex-1 w-full" />
-                </motion.div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Values Section */}
-      <section className="py-24">
-        <div className="container mx-auto px-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-12 text-center">
-            {values.map((val, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
-                className="flex flex-col items-center"
-              >
-                {val.icon}
-                <h3 className="font-bebas text-3xl mb-4">{val.title}</h3>
-                <p className="text-gray-400 leading-relaxed">{val.desc}</p>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Reviews Section */}
-      <section id="reviews" className="py-24 bg-white/5">
-        <div className="container mx-auto px-6 overflow-hidden">
-          <div className="text-center mb-16">
-            <h2 className="font-bebas text-5xl md:text-6xl mb-4">WHAT OUR <span className="text-brand-crimson">CLIENTS SAY</span></h2>
-          </div>
-
-          <div className="flex overflow-x-auto gap-6 pb-8 snap-x scrollbar-hide">
-            {reviews.map((review, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0 }}
-                whileInView={{ opacity: 1 }}
-                viewport={{ once: true }}
-                className="min-w-[300px] md:min-w-[400px] bg-brand-navy p-8 rounded-xl border border-white/10 shrink-0 snap-center relative"
-              >
-                <Quote className="absolute top-6 right-6 w-12 h-12 text-white/5" />
-                <div className="flex mb-4">
-                  {[...Array(5)].map((_, j) => (
-                    <Star key={j} className="w-4 h-4 text-brand-crimson fill-brand-crimson" />
-                  ))}
-                </div>
-                <p className="text-gray-300 italic mb-6 leading-relaxed relative z-10">"{review.text}"</p>
-                <div>
-                  <div className="font-bold text-white">{review.name}</div>
-                  <div className="text-sm text-gray-500">{review.date}</div>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Manufacturer Partners */}
-      <section className="py-16 border-y border-white/10 bg-black">
-        <div className="container mx-auto px-6">
-          <p className="text-center text-sm font-bold tracking-widest text-gray-500 mb-8 uppercase">Certified Installers For</p>
-          <div className="flex flex-wrap justify-center gap-8 md:gap-16 opacity-50">
-            {partners.map((partner, i) => (
-              <div key={i} className="font-bebas text-2xl md:text-3xl tracking-widest text-white">{partner}</div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Footer */}
-      <footer className="bg-brand-navy pt-24 pb-12 border-t border-brand-crimson/30">
-        <div className="container mx-auto px-6">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
-            <div className="md:col-span-2">
-              <span className="font-bebas text-4xl tracking-wider text-white mb-6 block">NOBLE<span className="text-brand-crimson">ROOFING</span></span>
-              <p className="text-gray-400 mb-8 max-w-md">
-                Noble Roofing serves Greater Houston with commercial roofing for industrial, retail, healthcare, and multifamily properties.
-              </p>
-              <div className="flex space-x-4">
-                <a href="https://www.youtube.com/watch?v=pi96wVpE1KY" target="_blank" rel="noreferrer" className="text-white hover:text-brand-crimson transition-colors">
-                  <div className="w-10 h-10 rounded-full border border-white/20 flex items-center justify-center">
-                    <ChevronRight className="w-5 h-5" />
-                  </div>
-                </a>
-              </div>
-            </div>
-
-            <div>
-              <h4 className="font-bebas text-xl mb-6 tracking-widest">CONTACT INFO</h4>
-              <ul className="space-y-4">
-                <li className="flex items-start text-gray-400">
-                  <MapPin className="w-5 h-5 mr-3 shrink-0 text-brand-crimson" />
-                  <span>1019 Pruitt Rd,<br/>Spring, TX 77380</span>
-                </li>
-                <li className="flex items-center text-gray-400 hover:text-white transition-colors">
-                  <Phone className="w-5 h-5 mr-3 shrink-0 text-brand-crimson" />
-                  <a href="tel:3464964500">(346) 496-4500</a>
-                </li>
-                <li className="flex items-center text-gray-400 hover:text-white transition-colors">
-                  <Mail className="w-5 h-5 mr-3 shrink-0 text-brand-crimson" />
-                  <a href="mailto:contact@nobleroofing.co">contact@nobleroofing.co</a>
-                </li>
-              </ul>
-            </div>
-
-            <div>
-              <h4 className="font-bebas text-xl mb-6 tracking-widest">QUICK LINKS</h4>
-              <ul className="space-y-2 text-gray-400">
-                <li><a href="#services" className="hover:text-white transition-colors">Commercial Services</a></li>
-                <li><a href="#process" className="hover:text-white transition-colors">Our Process</a></li>
-                <li><a href="#reviews" className="hover:text-white transition-colors">Client Reviews</a></li>
-              </ul>
-            </div>
-          </div>
-
-          <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center text-gray-500 text-sm gap-4 text-center md:text-left">
-            <p>&copy; {new Date().getFullYear()} Noble Roofing. All rights reserved.</p>
-            <p className="italic font-medium text-gray-400">"But the noble make noble plans, and by noble deeds they stand." — Isaiah 32:8</p>
-          </div>
-        </div>
-      </footer>
-
+export default function App() {
+  return (
+    <div className="relative min-h-screen selection:bg-[#9e1b27] selection:text-white">
+      <ParticleCanvas />
+      <EmberParticles />
+      <TopBar />
+      <Navbar />
+      <Hero />
+      <Services />
+      <SocialProof />
+      <Accreditations />
+      <Footer />
+      <ConciergeModal />
     </div>
   );
 }
