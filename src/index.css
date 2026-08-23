@@ -3,31 +3,26 @@
 @tailwind utilities;
 
 @layer base {
-  html {
-    scroll-behavior: smooth;
-    background-color: #050a15;
-    color: #f8fafc;
-  }
-  
   body {
-    @apply antialiased selection:bg-brand-crimson selection:text-white;
+    @apply bg-[#050a15] text-white font-montserrat;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-bebas tracking-wide;
   }
 }
 
-@layer utilities {
-  .glass-panel {
-    @apply bg-white/5 backdrop-blur-xl border border-white/10 shadow-2xl;
-  }
-  
-  .glass-panel-dark {
-    @apply bg-black/40 backdrop-blur-2xl border border-white/5 shadow-2xl;
-  }
+.font-bebas {
+  font-family: 'Bebas Neue', sans-serif;
+}
+.font-montserrat {
+  font-family: 'Montserrat', sans-serif;
+}
 
-  .text-gradient {
-    @apply bg-clip-text text-transparent bg-gradient-to-r from-white via-gray-200 to-gray-500;
-  }
-
-  .text-gradient-crimson {
-    @apply bg-clip-text text-transparent bg-gradient-to-r from-red-400 via-brand-crimson to-red-900;
-  }
+/* Hide scrollbar for review carousel */
+.scrollbar-hide::-webkit-scrollbar {
+    display: none;
+}
+.scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
 }
